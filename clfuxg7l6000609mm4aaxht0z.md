@@ -16,25 +16,9 @@ Docker has become an essential tool for many developers in recent years, allowin
 
 However, even with its many benefits, Docker's volume management can sometimes be challenging. In particular, taking backups and restoring volumes can be a complex and error-prone process. In this article, we'll explore why you might need to take backups of your volumes and how to do it correctly.
 
-## **Pain Area**
+## **Why?**
 
-As mentioned earlier, taking backups and restoring volumes in Docker can be a challenging process. Here are some of the pain areas that developers may encounter when working with Docker volumes:
-
-### **Complexity**
-
-Managing data volumes in Docker can be a complex process. There are many different ways to create and manage volumes, and the correct approach will depend on your specific use case. This complexity can lead to confusion and mistakes, making it difficult to take backups and restore volumes correctly.
-
-### **Data Loss**
-
-Data loss is one of the most significant risks associated with managing Docker volumes. If a volume is accidentally deleted or corrupted, all of the data stored within it may be lost forever. This can be a significant problem for developers who rely on Docker volumes to store critical data.
-
-### **Time-Consuming**
-
-Taking backups and restoring volumes can be a time-consuming process, particularly if you have a large volume of data to work with. This can be frustrating for developers who need to get work done quickly and efficiently.
-
-## **Reasons**
-
-Despite the challenges associated with taking backups and restoring volumes in Docker, there are many compelling reasons to do so. Here are a few reasons why you might need to take backups of your Docker volumes:
+There are many compelling reasons to do so. Here are a few reasons why you might need to take backups of your Docker volumes:
 
 ### **Disaster Recovery**
 
@@ -67,7 +51,7 @@ To create a backup of the volume, you can use the `docker run` command to start 
 Here's an example of how to do this:
 
 ```bash
-bashCopy codedocker run --rm -v <volume-name>:/volume -v <backup-location>:/backup \
+docker run --rm -v <volume-name>:/volume -v <backup-location>:/backup \
     busybox tar -czvf /backup/<backup-filename>.tar.gz /volume
 ```
 
@@ -78,30 +62,42 @@ In this command, replace `<volume-name>` with the name of the volume you want to
 Once the backup is complete, you should verify that the backup was successful and that you can restore the data from the backup if necessary. You can do this by running the following command:
 
 ```bash
-bashCopy codedocker run --rm -v <backup-location>:/backup busybox tar -tzvf /backup/<backup-filename>.tar.gz
+docker run --rm -v <backup-location>:/backup busybox tar -tzvf /backup/<backup-filename>.tar.gz
 ```
 
 This command will show you the contents of the backup file. Make sure that all of the files and directories that you expect to be included in the backup are present.
 
-### **Step 4: Restore the Volume**
+### **Step 4: Move the Backup File to an External Server**
+
+After you have created a backup file, it's a good idea to move it to an external server or storage device to ensure that it's safe and secure. Storing the backup file on a separate server or storage device can help to protect it in the event of a disaster, such as a server failure or a security breach.
+
+To move the backup file to an external server, you can use SCP.
+
+**SCP**: Secure Copy (SCP) is a secure file transfer protocol that allows you to transfer files between servers using SSH. To use SCP, you will need to have SSH access to both the source and destination servers. You can use the following command to copy the backup file to the external server:
+
+```bash
+scp /path/to/backupfile user@external-server:/path/to/destination
+```
+
+### **Step 5: Restore the Volume**
 
 If you need to restore the volume from the backup, you can use the `docker run` command to start a container that mounts the backup file and a separate container that writes the backup data to the volume.
 
 Here's an example of how to do this:
 
 ```bash
-bashCopy codedocker run --rm -v <backup-location>:/backup -v <volume-name>:/volume \
+docker run --rm -v <backup-location>:/backup -v <volume-name>:/volume \
     busybox tar -xzvf /backup/<backup-filename>.tar.gz -C /volume
 ```
 
 In this command, replace `<volume-name>` with the name of the volume you want to restore, `<backup-location>` with the location of the backup file, and `<backup-filename>` with the name of the backup file.
 
-### **Step 5: Verify the Restore**
+### **Step 6: Verify the Restore**
 
 Once the restore is complete, you should verify that the data has been restored correctly. You can do this by running the following command:
 
 ```bash
-bashCopy codedocker run --rm -v <volume-name>:/volume busybox ls -la /volume
+docker run --rm -v <volume-name>:/volume busybox ls -la /volume
 ```
 
 This command will show you the contents of the restored volume. Make sure that all of the files and directories that you expect to be present are there.
