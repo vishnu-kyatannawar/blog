@@ -10,7 +10,7 @@ tags: docker
 
 As more and more developers turn to Docker to streamline their development processes, it becomes increasingly important to understand how to take backup and restore a volume in Docker. In this article, we'll explore the pain areas around volume backup and restoration, the reasons for doing it, and provide a comprehensive solution that will help you take backup and restore volumes with ease.
 
-## **Introduction**
+## **What?**
 
 Docker has become an essential tool for many developers in recent years, allowing them to create and manage containerized applications with ease. One of the most significant advantages of Docker is its ability to manage data volumes, allowing you to store data that persists beyond the lifetime of a container.
 
@@ -32,7 +32,7 @@ Another reason to take backups of your Docker volumes is for testing and develop
 
 Taking backups of your Docker volumes can also be useful for replicating data across multiple environments. By creating backups of your volumes and restoring them in other environments, you can ensure that your data is consistent across all of your development, staging, and production environments.
 
-## **Solution**
+## **How?**
 
 Now that we've explored the pain areas and reasons for taking backups and restoring volumes in Docker, let's take a look at how to do it correctly. Here are the steps you should follow to take backups of your volumes:
 
