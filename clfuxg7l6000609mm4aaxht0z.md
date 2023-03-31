@@ -155,7 +155,7 @@ You can also view the volume which you created using the following command.
 docker volume ls
 ```
 
-For the output looks like this
+For me the output looks like this
 
 ```bash
 DRIVER    VOLUME NAME
