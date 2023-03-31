@@ -90,11 +90,11 @@ In this command, replace `<volume-name>` with the name of the volume you want to
 
 ## **Example**
 
-Let's do this with an example. For the sake of this blog, I will set up a simple docker for MongoDB with Express MongoDB to visualize the data.
+For the purpose of this blog, we will be setting up a basic Docker environment for MongoDB, along with an Express application to visualize the data.
 
-### **Setup MongoDB docker**
+### **Setup MongoDB Docker**
 
-Create a docker-compose.yml file.
+Create a `docker-compose.yml` file.
 
 You can use the below example to setup MongoDB docker:
 
@@ -135,13 +135,13 @@ In the above example, I added a named volume `mongodb`. Here we have configured 
 docker-compose up
 ```
 
-To check the running containers you can use the below command.
+To check the running docker containers you can use the below command.
 
 ```bash
 docker ps
 ```
 
-You should see 2 containers i.e. `mongo` and `mongo-express`.
+You should see 2 docker containers running i.e. `mongo` and `mongo-express`.
 
 ```bash
 CONTAINER ID   IMAGE           COMMAND                  CREATED          STATUS          PORTS                                       NAMES
@@ -164,13 +164,11 @@ local     32582d9a00557c9229418062e6308515c4c4c7eb0bb14a8c43203cafffb675c5
 local     docker-test_mongodb
 ```
 
-`docker-test_mongodb` is the volume name that got created for me because my `docker-composer.yml` file was inside a folder `docker-test`.
-
-This is where all our MongoDB data will be stored.
+The volume name `docker-test_mongodb` was automatically created when I placed my `docker-composer.yml` file inside the `docker-test folder`. This is the location where all of our MongoDB data will be stored.
 
 ### **Modify MongoDB Data**
 
-We need to make a small change to the database to verify that we were able to restore the database from volume successfully.
+To confirm that we have successfully restored the database from the volume, we need to make a minor modification to the database.
 
 Visit `0.0.0.0:8081` where the Mongo Express is running.
 
@@ -202,7 +200,7 @@ You should see a backup file created with `docker-test_mongodb.tar.gz` as the fi
 
 ### **Reset Docker**
 
-Since I will be doing the restore step on the same machine, I should delete the container and the volume.
+As I will be performing the restore process on the same machine, I should delete both the container and the volume.
 
 ```bash
 docker rm -v mongo-express
@@ -216,11 +214,9 @@ docker rm -v mongo
 docker volume rm docker-test_mongodb
 ```
 
-Above commands will remove both containers and volume.
-
 ### **Restore Backup**
 
-First I will create the containers again. And we can verify that the volume is deleted by checking the databases on Mongo Express.
+I will proceed to recreate the containers, and we can confirm that the volume has been deleted by checking the databases on Mongo Express.
 
 ![](https://cdn.hashnode.com/res/hashnode/image/upload/v1680247432450/75d1669d-e2a3-4609-8766-ea9b6581e01f.png align="center")
 
@@ -238,7 +234,7 @@ Go to Mongo Express and refresh the page.
 
 ![](https://cdn.hashnode.com/res/hashnode/image/upload/v1680247514236/6a853b9f-3036-400d-85ff-74935e1a253c.png align="center")
 
-You should be able to see the database which we created earlier will be restored.
+You will now be able to see that the database which we previously created has been successfully restored.
 
 ## **Conclusion**
 
