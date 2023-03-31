@@ -51,23 +51,16 @@ To create a backup of the volume, you can use the `docker run` command to start 
 Here's an example of how to do this:
 
 ```bash
-docker run --rm -v <volume-name>:/volume -v <backup-location>:/backup \
-    busybox tar -czvf /backup/<backup-filename>.tar.gz /volume
+docker run --rm \
+--mount source=<volume-name>,target=<target> \
+-v $(pwd):/backup \
+busybox \
+tar -czvf /backup/<backup-filename>.tar.gz <target>
 ```
 
-In this command, replace `<volume-name>` with the name of the volume you want to back up, `<backup-location>` with the location where you want to store the backup file, and `<backup-filename>` with a name for the backup file.
+In this command, replace `<volume-name>` with the name of the volume you want to back up, `<target>` with the mount point inside the docker container, and `<backup-filename>` with a name for the backup file.
 
-### **Step 3: Verify the Backup**
-
-Once the backup is complete, you should verify that the backup was successful and that you can restore the data from the backup if necessary. You can do this by running the following command:
-
-```bash
-docker run --rm -v <backup-location>:/backup busybox tar -tzvf /backup/<backup-filename>.tar.gz
-```
-
-This command will show you the contents of the backup file. Make sure that all of the files and directories that you expect to be included in the backup are present.
-
-### **Step 4: Move the Backup File to an External Server**
+### **Step 3: Move the Backup File to an External Server**
 
 After you have created a backup file, it's a good idea to move it to an external server or storage device to ensure that it's safe and secure. Storing the backup file on a separate server or storage device can help to protect it in the event of a disaster, such as a server failure or a security breach.
 
@@ -79,28 +72,173 @@ To move the backup file to an external server, you can use SCP.
 scp /path/to/backupfile user@external-server:/path/to/destination
 ```
 
-### **Step 5: Restore the Volume**
+### **Step 4: Restore the Volume**
 
 If you need to restore the volume from the backup, you can use the `docker run` command to start a container that mounts the backup file and a separate container that writes the backup data to the volume.
 
 Here's an example of how to do this:
 
 ```bash
-docker run --rm -v <backup-location>:/backup -v <volume-name>:/volume \
-    busybox tar -xzvf /backup/<backup-filename>.tar.gz -C /volume
+docker run --rm \
+--mount source=<volume-name>,target=<target> \
+-v $(pwd):/backup \
+busybox \
+tar -xzvf /backup/<backup-filename>.tar.gz -C /
 ```
 
-In this command, replace `<volume-name>` with the name of the volume you want to restore, `<backup-location>` with the location of the backup file, and `<backup-filename>` with the name of the backup file.
+In this command, replace `<volume-name>` with the name of the volume you want to back up, `<target>` with the mount point inside the docker container, and `<backup-filename>` with a name for the backup file.
 
-### **Step 6: Verify the Restore**
+## **Example**
 
-Once the restore is complete, you should verify that the data has been restored correctly. You can do this by running the following command:
+Let's do this with an example. For the sake of this blog, I will set up a simple docker for MongoDB with Express MongoDB to visualize the data.
+
+### **Setup MongoDB docker**
+
+Create a docker-compose.yml file.
+
+You can use the below example to setup MongoDB docker:
+
+```yaml
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongodb:/data/db
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+
+volumes:
+  mongodb: ~
+```
+
+In the above example, I added a named volume `mongodb`. Here we have configured docker to persist its data to a volume.
 
 ```bash
-docker run --rm -v <volume-name>:/volume busybox ls -la /volume
+docker-compose up
 ```
 
-This command will show you the contents of the restored volume. Make sure that all of the files and directories that you expect to be present are there.
+To check the running containers you can use the below command.
+
+```bash
+docker ps
+```
+
+You should see 2 containers i.e. `mongo` and `mongo-express`.
+
+```bash
+CONTAINER ID   IMAGE           COMMAND                  CREATED          STATUS          PORTS                                       NAMES
+5f68eaf8184a   mongo-express   "tini -- /docker-ent…"   11 seconds ago   Up 9 seconds    0.0.0.0:8081->8081/tcp, :::8081->8081/tcp   mongo-express
+6789cf1e7bed   mongo           "docker-entrypoint.s…"   11 seconds ago   Up 10 seconds   27017/tcp                                   mongo
+```
+
+You can also view the volume which you created using the following command.
+
+```bash
+docker volume ls
+```
+
+For the output looks like this
+
+```bash
+DRIVER    VOLUME NAME
+local     82fd19dfc5dc839a51b2afd59614474038cd0ce8b494739d883d9b503cd0c61e
+local     32582d9a00557c9229418062e6308515c4c4c7eb0bb14a8c43203cafffb675c5
+local     docker-test_mongodb
+```
+
+`docker-test_mongodb` is the volume name that got created for me because my `docker-composer.yml` file was inside a folder `docker-test`.
+
+This is where all our MongoDB data will be stored.
+
+### **Modify MongoDB Data**
+
+We need to make a small change to the database to verify that we were able to restore the database from volume successfully.
+
+Visit `0.0.0.0:8081` where the Mongo Express is running.
+
+![](https://cdn.hashnode.com/res/hashnode/image/upload/v1680247432450/75d1669d-e2a3-4609-8766-ea9b6581e01f.png align="center")
+
+Create a new database here. I created `my-new-db` as the new database.
+
+![](https://cdn.hashnode.com/res/hashnode/image/upload/v1680247514236/6a853b9f-3036-400d-85ff-74935e1a253c.png align="center")
+
+So now we need to ensure that this new database that is created is also restored.
+
+### **Take Backup**
+
+Let's take the backup of the volume now.
+
+Please run the following command to take the backup.
+
+```bash
+  docker run --rm \
+  --mount source=docker-test_mongodb,target=/data/db \
+  -v $(pwd):/backup \
+  busybox \
+  tar -czvf /backup/docker-test_mongodb.tar.gz /data/db
+```
+
+`/data/db` here is the path that is mounted inside the docker container for the volume.
+
+You should see a backup file created with `docker-test_mongodb.tar.gz` as the file name.
+
+### **Reset Docker**
+
+Since I will be doing the restore step on the same machine, I should delete the container and the volume.
+
+```bash
+docker rm -v mongo-express
+```
+
+```bash
+docker rm -v mongo
+```
+
+```bash
+docker volume rm docker-test_mongodb
+```
+
+Above commands will remove both containers and volume.
+
+### **Restore Backup**
+
+First I will create the containers again. And we can verify that the volume is deleted by checking the databases on Mongo Express.
+
+![](https://cdn.hashnode.com/res/hashnode/image/upload/v1680247432450/75d1669d-e2a3-4609-8766-ea9b6581e01f.png align="center")
+
+Now we can run the below command to restore the backup.
+
+```bash
+docker run --rm \
+--mount source=docker-test_mongodb,target=/data/db \
+-v $(pwd):/backup \
+busybox \
+tar -xzvf /backup/docker-test_mongodb.tar.gz -C /
+```
+
+Go to Mongo Express and refresh the page.
+
+![](https://cdn.hashnode.com/res/hashnode/image/upload/v1680247514236/6a853b9f-3036-400d-85ff-74935e1a253c.png align="center")
+
+You should be able to see the database which we created earlier will be restored.
 
 ## **Conclusion**
 
