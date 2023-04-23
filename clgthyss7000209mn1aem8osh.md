@@ -53,3 +53,7 @@ Now connect your old router with the new router using the LAN ports.
 ### Step 6
 
 Now you should be able to connect your devices to the old router WiFi and LAN port to access the Internet.
+
+## Conclusion
+
+In conclusion, using an old WiFi router as an extender is a cost-effective solution for extending the range of your wireless network. By repurposing an old router that you may already have, you can save money on buying a new extender and also improve the overall performance of your wireless network. However, it's important to note that not all routers are suitable for use as an extender. By following the steps outlined in this article, you can easily configure your old router as an extender and enjoy better coverage and improved performance for your wireless network.
